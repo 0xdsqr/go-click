@@ -10,6 +10,8 @@ import (
 type App[T any] struct {
 	// Name is used when constructing the root flag set.
 	Name string
+	// ConfigureRoot initializes shared root state before flags are parsed.
+	ConfigureRoot func(*T)
 	// ConfigureRootFlags registers flags shared across the whole command tree.
 	ConfigureRootFlags func(*flag.FlagSet, *T)
 	// Commands are the top-level commands available in the app.
@@ -23,6 +25,10 @@ type App[T any] struct {
 // Run parses root flags and dispatches the matching command.
 func (a App[T]) Run(ctx context.Context, args []string) error {
 	var root T
+
+	if a.ConfigureRoot != nil {
+		a.ConfigureRoot(&root)
+	}
 
 	fs := flag.NewFlagSet(a.Name, flag.ContinueOnError)
 	fs.SetOutput(a.stderr())

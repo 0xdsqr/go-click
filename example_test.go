@@ -10,11 +10,15 @@ import (
 
 func ExampleApp() {
 	type rootFlags struct {
+		Host    string
 		Verbose bool
 	}
 
 	app := click.App[rootFlags]{
 		Name: "demo",
+		ConfigureRoot: func(root *rootFlags) {
+			root.Host = "local"
+		},
 		ConfigureRootFlags: func(fs *flag.FlagSet, root *rootFlags) {
 			fs.BoolVar(&root.Verbose, "v", false, "enable verbose output")
 		},

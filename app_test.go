@@ -35,6 +35,7 @@ func TestAppRunPrintsHelpWhenNoCommandIsGiven(t *testing.T) {
 func TestAppRunPassesRootFlagsAndPassthrough(t *testing.T) {
 	type rootFlags struct {
 		Verbose bool
+		Prefix  string
 	}
 
 	var (
@@ -45,6 +46,9 @@ func TestAppRunPassesRootFlagsAndPassthrough(t *testing.T) {
 
 	app := App[rootFlags]{
 		Name: "demo",
+		ConfigureRoot: func(root *rootFlags) {
+			root.Prefix = "demo"
+		},
 		ConfigureRootFlags: func(fs *flag.FlagSet, root *rootFlags) {
 			fs.BoolVar(&root.Verbose, "v", false, "enable verbose output")
 		},
@@ -69,6 +73,9 @@ func TestAppRunPassesRootFlagsAndPassthrough(t *testing.T) {
 
 	if !gotRoot.Verbose {
 		t.Fatalf("expected verbose root flag to be true")
+	}
+	if gotRoot.Prefix != "demo" {
+		t.Fatalf("expected prefix to be initialized, got %q", gotRoot.Prefix)
 	}
 	if strings.Join(gotArgs, ",") != "one" {
 		t.Fatalf("unexpected args: %v", gotArgs)

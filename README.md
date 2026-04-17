@@ -24,6 +24,7 @@ but i'm lazy. if you want something more standard or more fully featured, use
 
 you can really only do these things with it:
 
+* shared root state
 * root flags
 * nested commands
 * passthrough args after `--`
@@ -58,6 +59,9 @@ type root struct {
 func main() {
 	app := click.App[root]{
 		Name: "demo",
+		ConfigureRoot: func(cfg *root) {
+			cfg.verbose = false
+		},
 		ConfigureRootFlags: func(fs *flag.FlagSet, cfg *root) {
 			fs.BoolVar(&cfg.verbose, "v", false, "enable verbose output")
 		},
@@ -102,6 +106,33 @@ app := click.App[struct{}]{
 			Name: "hello",
 			Run: func(_ context.Context, env click.Env[struct{}], _ []string, _ []string) error {
 				fmt.Fprintln(env.Stdout, "hello")
+				return nil
+			},
+		},
+	},
+}
+```
+
+</details>
+
+<details>
+<summary>shared root state</summary>
+
+```go
+type root struct {
+	host string
+}
+
+app := click.App[root]{
+	Name: "demo",
+	ConfigureRoot: func(cfg *root) {
+		cfg.host = "local"
+	},
+	Commands: []click.Command[root]{
+		{
+			Name: "host",
+			Run: func(_ context.Context, env click.Env[root], _ []string, _ []string) error {
+				fmt.Fprintln(env.Stdout, env.Root.host)
 				return nil
 			},
 		},
