@@ -1,0 +1,14 @@
+# Go build outputs and coverage artifacts.
+*.exe
+*.exe~
+*.test
+*.out
+coverage.out
+bin/
+
+# Nix shell and build outputs.
+.direnv/
+result
+
+# Local OS/editor noise.
+.DS_Store
