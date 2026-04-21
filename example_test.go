@@ -25,6 +25,9 @@ func ExampleApp() {
 		Commands: []click.Command[rootFlags]{
 			{
 				Name: "hello",
+				ConfigureFlags: func(fs *flag.FlagSet) {
+					fs.Bool("loud", false, "print loudly")
+				},
 				Run: func(_ context.Context, env click.Env[rootFlags], _ []string, _ []string) error {
 					fmt.Fprintln(env.Stdout, "hello from go-click")
 					return nil

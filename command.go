@@ -2,6 +2,7 @@ package click
 
 import (
 	"context"
+	"flag"
 	"io"
 )
 
@@ -18,10 +19,12 @@ type Command[T any] struct {
 	Name string
 	// Description is a short help string shown in command listings.
 	Description string
-	// Usage is reserved for future, more detailed help output.
+	// Usage overrides the default command path shown in help output.
 	Usage string
 	// Commands are this command's nested subcommands.
 	Commands []Command[T]
+	// ConfigureFlags registers flags for this specific command.
+	ConfigureFlags func(*flag.FlagSet)
 	// Passthrough allows args after `--` to be passed separately to Run.
 	Passthrough bool
 	// Run executes the command with normal and passthrough arguments.

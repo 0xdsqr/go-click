@@ -26,6 +26,7 @@ you can really only do these things with it:
 
 * shared root state
 * root flags
+* command flags
 * nested commands
 * passthrough args after `--`
 * injected `stdout` / `stderr`
@@ -199,6 +200,46 @@ usage:
 
 ```bash
 demo project list
+```
+
+</details>
+
+<details>
+<summary>command flags</summary>
+
+```go
+var formatJSON bool
+
+app := click.App[struct{}]{
+	Name: "demo",
+	Commands: []click.Command[struct{}]{
+		{
+			Name: "project",
+			Commands: []click.Command[struct{}]{
+				{
+					Name: "list",
+					ConfigureFlags: func(fs *flag.FlagSet) {
+						fs.BoolVar(&formatJSON, "json", false, "output JSON")
+					},
+					Run: func(_ context.Context, env click.Env[struct{}], _ []string, _ []string) error {
+						if formatJSON {
+							fmt.Fprintln(env.Stdout, `["a","b"]`)
+							return nil
+						}
+						fmt.Fprintln(env.Stdout, "a\nb")
+						return nil
+					},
+				},
+			},
+		},
+	},
+}
+```
+
+usage:
+
+```bash
+demo project list --json
 ```
 
 </details>
