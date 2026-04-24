@@ -84,3 +84,33 @@ func TestAppRunPassesRootFlagsAndPassthrough(t *testing.T) {
 		t.Fatalf("unexpected passthrough args: %v", gotPass)
 	}
 }
+
+func TestAppRunPrintsRootHelp(t *testing.T) {
+	var stdout bytes.Buffer
+
+	app := App[struct{}]{
+		Name:   "demo",
+		Stdout: &stdout,
+		ConfigureRootFlags: func(fs *flag.FlagSet, _ *struct{}) {
+			fs.Bool("v", false, "enable verbose output")
+		},
+		Commands: []Command[struct{}]{
+			{Name: "hello", Description: "print a greeting"},
+		},
+	}
+
+	if err := app.Run(context.Background(), []string{"--help"}); err != nil {
+		t.Fatalf("Run returned error: %v", err)
+	}
+
+	got := stdout.String()
+	if !strings.Contains(got, "Usage: demo [flags] <command>") {
+		t.Fatalf("help output missing usage: %q", got)
+	}
+	if !strings.Contains(got, "Commands:") {
+		t.Fatalf("help output missing commands heading: %q", got)
+	}
+	if !strings.Contains(got, "-v") {
+		t.Fatalf("help output missing root flag: %q", got)
+	}
+}

@@ -7,6 +7,8 @@ import (
 	"os"
 )
 
+// App describes a CLI application with shared root state and top-level
+// commands.
 type App[T any] struct {
 	// Name is used when constructing the root flag set.
 	Name string
@@ -30,8 +32,7 @@ func (a App[T]) Run(ctx context.Context, args []string) error {
 		a.ConfigureRoot(&root)
 	}
 
-	fs := flag.NewFlagSet(a.Name, flag.ContinueOnError)
-	fs.SetOutput(a.stderr())
+	fs, showHelp := newFlagSet(a.Name, a.stderr())
 
 	if a.ConfigureRootFlags != nil {
 		a.ConfigureRootFlags(fs, &root)
@@ -45,6 +46,10 @@ func (a App[T]) Run(ctx context.Context, args []string) error {
 		Stdout: a.stdout(),
 		Stderr: a.stderr(),
 		Root:   root,
+	}
+
+	if showHelp.value {
+		return printAppHelp(env, a.Name, fs, a.Commands)
 	}
 
 	return runCommands(ctx, env, a.Commands, fs.Args())

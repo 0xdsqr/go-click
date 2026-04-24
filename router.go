@@ -80,7 +80,7 @@ type helpFlag struct {
 	value bool
 }
 
-func newCommandFlagSet(name string, stderr io.Writer) (*flag.FlagSet, *helpFlag) {
+func newFlagSet(name string, stderr io.Writer) (*flag.FlagSet, *helpFlag) {
 	fs := flag.NewFlagSet(name, flag.ContinueOnError)
 	if stderr != nil {
 		fs.SetOutput(stderr)
@@ -91,6 +91,10 @@ func newCommandFlagSet(name string, stderr io.Writer) (*flag.FlagSet, *helpFlag)
 	fs.BoolVar(&showHelp.value, "help", false, "show help")
 
 	return fs, showHelp
+}
+
+func newCommandFlagSet(name string, stderr io.Writer) (*flag.FlagSet, *helpFlag) {
+	return newFlagSet(name, stderr)
 }
 
 func commandPath(path []string, name string) string {

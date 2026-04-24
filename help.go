@@ -6,6 +6,51 @@ import (
 	"strings"
 )
 
+func printAppHelp[T any](env Env[T], name string, fs *flag.FlagSet, commands []Command[T]) error {
+	usage := name
+	if hasVisibleFlags(fs) {
+		usage += " [flags]"
+	}
+	if len(commands) > 0 {
+		usage += " <command>"
+	}
+
+	if _, err := fmt.Fprintf(env.Stdout, "Usage: %s\n", usage); err != nil {
+		return err
+	}
+
+	if fs != nil && hasVisibleFlags(fs) {
+		if _, err := fmt.Fprintln(env.Stdout, "\nFlags:"); err != nil {
+			return err
+		}
+		fs.SetOutput(env.Stdout)
+		fs.PrintDefaults()
+	}
+
+	if len(commands) == 0 {
+		return nil
+	}
+
+	if _, err := fmt.Fprintln(env.Stdout, "\nCommands:"); err != nil {
+		return err
+	}
+
+	for _, cmd := range commands {
+		if cmd.Description == "" {
+			if _, err := fmt.Fprintf(env.Stdout, "  %s\n", cmd.Name); err != nil {
+				return err
+			}
+			continue
+		}
+
+		if _, err := fmt.Fprintf(env.Stdout, "  %s\t%s\n", cmd.Name, cmd.Description); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func printHelp[T any](env Env[T], commands []Command[T]) error {
 	if len(commands) == 0 {
 		_, err := fmt.Fprintln(env.Stdout, "No commands available.")
